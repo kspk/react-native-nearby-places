@@ -49,12 +49,10 @@ export type SearchNearbyOptions = {
 /**
  * Natural-language search within a region.
  *
- * - iOS: `MKLocalSearch` — full POI + address coverage.
- * - Android: `android.location.Geocoder.getFromLocationName(...)` —
- *   region-bounded text search. `resultTypes` is honoured client-side:
- *   results that look like pure addresses (no `featureName`, or a name
- *   equal to the street number/thoroughfare) are filtered out unless
- *   `'address'` is in `resultTypes`.
+ * - **iOS:** `MKLocalSearch` — full POI + address coverage.
+ * - **Android:** not implemented in v0.4 — rejects with
+ *   `E_NEARBY_PLACES_NOT_SUPPORTED`. Will return once Google Places Text
+ *   Search is wired (planned).
  *
  * @example
  * const places = await search({
@@ -90,10 +88,9 @@ export async function search(options: SearchOptions): Promise<NearbyPlace[]> {
  *   POI data with `placeId` populated. Requires
  *   `com.google.android.geo.API_KEY` in the consumer's
  *   `AndroidManifest.xml`. See the README's Android Setup section.
- * - **Android (no key):** `Geocoder` fallback. Geocoder isn't POI-aware
- *   so category-style searches return ~0 results. Compiles + runs but
- *   not useful for actual nearby browsing; meant as a graceful
- *   degradation while consumers provision a key.
+ * - **Android (no key):** resolves with an empty array. No Geocoder
+ *   fallback in v0.4+ — Geocoder isn't a POI index and returned ~0
+ *   useful results for category searches anyway.
  *
  * @example
  * const restaurants = await searchNearby({

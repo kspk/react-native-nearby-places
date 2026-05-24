@@ -4,10 +4,41 @@ All notable changes to this project will be documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is
 [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] — 2026-05-22
+
+### Removed
+- **Geocoder fallback on Android.** Earlier versions backed
+  `searchNearby` on `android.location.Geocoder` when no Places API key
+  was configured. In practice Geocoder is an address service, not a POI
+  index — it returned ~0 results for category browsing, leaving
+  consumers with a misleading "API is working but empty" signal. Removed
+  in favour of explicit semantics: no key configured →
+  `searchNearby()` resolves with `[]`. `search()` (which only had the
+  Geocoder Android path) now rejects with `E_NEARBY_PLACES_NOT_SUPPORTED`
+  on Android until Places Text Search is wired.
+
+### Changed
+- Module size roughly halved. Removed `searchNearbyViaGeocoder`,
+  `geocode` helper, `GeocodeCallback` interface, `serializeAddress`,
+  `isAddressOnly`, `dedupeKey`, `CATEGORY_KEYWORDS`, `legacyExecutor`
+  (renamed `networkExecutor` and now only used for the Places HTTP
+  call). All Geocoder/Address imports dropped.
+- README and JSDoc updated to drop the "fallback" narrative — Android
+  setup section now describes the key as required rather than optional.
+
+### Migration notes
+- If you were relying on Geocoder text-query results via `search()`
+  on Android: pin to `0.3.0`, or wait for Places Text Search.
+- If you were relying on Geocoder category results via `searchNearby()`
+  on Android: those were almost certainly empty already — no behavior
+  change in practice. With a Places key configured, results improve
+  dramatically.
+
 ## [0.3.0] — 2026-05-22
 
-First public release. Earlier development iterations (`0.1.x`, `0.2.0`)
-were never published to npm — they're noted below for historical context.
+First public release on GitHub (tagged + pushed but never published
+to npm). Earlier development iterations (`0.1.x`, `0.2.0`) were never
+published either — they're noted below for historical context.
 
 ### Added
 - **Android — Google Places API (New) backend** for `searchNearby`. Auto-

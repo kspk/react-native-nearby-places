@@ -5,10 +5,9 @@ Native nearby Point-of-Interest search for React Native. Built as a pure TurboMo
 | Platform | Backend | API key | Cost |
 |---|---|---|---|
 | iOS 15.1+ | [`MKLocalSearch`](https://developer.apple.com/documentation/mapkit/mklocalsearch) + [`MKLocalPointsOfInterestRequest`](https://developer.apple.com/documentation/mapkit/mklocalpointsofinterestrequest) | Not required | Free (Apple bundles MapKit with iOS) |
-| Android (recommended) | [Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service) — Nearby Search, Pro SKU | Required | ~$32 per 1k calls (Pro SKU) |
-| Android (fallback) | [`android.location.Geocoder`](https://developer.android.com/reference/android/location/Geocoder) | Not required | Free, but ~0 results for category-style searches (Geocoder is an address service, not a POI index) |
+| Android | [Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service) — Nearby Search, Pro SKU | Required | ~$32 per 1k calls (Pro SKU) |
 
-The Android backend auto-selects: if the consumer's `AndroidManifest.xml` has `<meta-data android:name="com.google.android.geo.API_KEY" .../>`, Places is used. Otherwise the library falls back to Geocoder so the build doesn't crash.
+The library compiles + runs on Android without a key, but `searchNearby()` will resolve with an empty array until one is configured. `search()` (text-query) isn't implemented on Android in this version and rejects with `E_NEARBY_PLACES_NOT_SUPPORTED` — wait for Places Text Search support in a future release.
 
 ## Why
 
@@ -31,9 +30,9 @@ cd ios && pod install   # iOS only
 
 Then rebuild your native app (Xcode / `expo run:ios` / `expo run:android`).
 
-## Android Setup (for real POI data)
+## Android Setup
 
-The library compiles + ships on Android without any setup, but `searchNearby` will return ~0 results because the Geocoder fallback isn't POI-aware. To get real data:
+The library ships on Android without any setup, but `searchNearby()` returns empty until you provision a Google Places key. To wire it up:
 
 ### 1. Provision a Google Cloud project + Places API key
 
@@ -75,7 +74,7 @@ That's it — `searchNearby` will now hit Google Places.
 
 ### `search(options): Promise<NearbyPlace[]>`
 
-Natural-language text search within a region. iOS uses `MKLocalSearch`; Android uses Geocoder's `getFromLocationName` (which is a genuine fit for text queries — it's the category-browse case where Geocoder falls short).
+Natural-language text search within a region. **iOS only** in this version (`MKLocalSearch`); on Android the call rejects with `E_NEARBY_PLACES_NOT_SUPPORTED`. Places Text Search support is planned for a future release.
 
 ```ts
 import { search } from 'react-native-nearby-places';
@@ -94,7 +93,7 @@ const results = await search({
 
 ### `searchNearby(options): Promise<NearbyPlace[]>`
 
-Category POI search — no query. iOS uses `MKLocalPointsOfInterestRequest`; Android uses Google Places (or Geocoder fallback).
+Category POI search — no query. iOS uses `MKLocalPointsOfInterestRequest`; Android uses Google Places (or returns empty when no key is configured).
 
 ```ts
 import { searchNearby } from 'react-native-nearby-places';
@@ -128,16 +127,16 @@ type NearbyPlace = {
 };
 ```
 
-All fields except `coordinate` are optional. Per-platform coverage varies — see the table below.
+All fields except `coordinate` are optional. Per-platform coverage:
 
-| Field | iOS (MapKit) | Android (Places) | Android (Geocoder fallback) |
-|---|:-:|:-:|:-:|
-| `placeId` | — | ✓ | — |
-| `name` | ✓ | ✓ | sometimes |
-| `coordinate` | ✓ | ✓ | ✓ |
-| `category` | ✓ | best-effort tag | best-effort tag |
-| `thoroughfare` / address parts | ✓ | `shortFormattedAddress` → `thoroughfare` only | ✓ |
-| `phoneNumber`, `url` | ✓ | — (would bump to Enterprise SKU) | — |
+| Field | iOS (MapKit) | Android (Places) |
+|---|:-:|:-:|
+| `placeId` | — | ✓ |
+| `name` | ✓ | ✓ |
+| `coordinate` | ✓ | ✓ |
+| `category` | ✓ | best-effort tag |
+| `thoroughfare` / address parts | ✓ | `shortFormattedAddress` → `thoroughfare` only |
+| `phoneNumber`, `url` | ✓ | — (would bump to Enterprise SKU) |
 
 ### Supported categories
 
@@ -148,7 +147,6 @@ restaurant, cafe, bakery, brewery, winery, foodMarket, nightlife
 Mapped per-platform:
 - iOS → `MKPointOfInterestCategory` values
 - Android Places → `restaurant`, `cafe`, `bakery`, `bar`, `liquor_store`, `supermarket`, `night_club` (umbrellas; `brewery`/`winery` don't have separate Places types)
-- Android Geocoder → English keywords (`"restaurant"`, `"cafe"`, etc — limited utility)
 
 ## Pairing with current location
 
@@ -170,7 +168,8 @@ const nearby = await searchNearby({
 
 - **iOS long-tail coverage is uneven.** Apple's database is curated, not crowdsourced. Major restaurants are well-represented; food trucks at farmers' markets, brand-new openings, and indie restaurants in non-major-metro areas may be missing. Pair with another source if you need full long-tail coverage.
 - **No reviews or ratings on either platform.** Adding them on Android would bump to the Enterprise Atmosphere SKU; out of scope for v0.x.
-- **Android without an API key returns ~0 results for category-style searches.** Geocoder is an address service, not a POI index. The fallback exists so your build doesn't crash, not so your users get useful results.
+- **Android without an API key returns empty.** The library compiles + runs but won't surface POIs until a key is configured. Render a "no results" state and prompt the user to use manual entry instead.
+- **`search()` is iOS-only in v0.4.** Android Places Text Search is planned; for now `search()` rejects on Android.
 - **Don't persist Places content beyond `placeId` + `(lat, lng)`** — see the pricing/caching note in the Android Setup section above.
 
 ## License

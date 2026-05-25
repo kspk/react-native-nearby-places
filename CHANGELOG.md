@@ -4,6 +4,21 @@ All notable changes to this project will be documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is
 [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] — 2026-05-22
+
+### Docs
+- README "Why" section: removed lingering claim that Android falls back
+  to Geocoder when no key is configured — that hasn't been true since
+  0.4.0 (Geocoder was removed; no key now resolves to `[]`).
+- `NearbyPlace.placeId` JSDoc: same correction — described the
+  no-key case in terms of "result set is empty" rather than "Geocoder
+  fallback".
+- GitHub repo description updated to match.
+
+No runtime changes. Doubles as the first CI-driven publish — kicked off
+by tagging `v0.4.2`, picked up by `.github/workflows/publish.yml`,
+authenticated via OIDC trusted publishing (no NPM_TOKEN).
+
 ## [0.4.1] — 2026-05-22
 
 First published-to-npm release. No runtime changes from 0.4.0 — this is

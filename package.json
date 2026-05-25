@@ -1,6 +1,6 @@
 {
   "name": "react-native-nearby-places",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Native nearby Point-of-Interest search for React Native — MKLocalSearch on iOS (no key), Google Places API (New) on Android. New-architecture TurboModule, zero Expo deps.",
   "main": "src/index.ts",
   "react-native": "src/index.ts",

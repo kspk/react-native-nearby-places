@@ -11,7 +11,7 @@ The library compiles + runs on Android without a key, but `searchNearby()` will 
 
 ## Why
 
-Commercial places APIs (Foursquare, Yelp) cost money and require a backend proxy for key safety. Apple's MapKit ships with iOS and surfaces a curated POI database that's strong for established businesses — good enough for "what restaurants are near me right now?" without writing a backend. Android doesn't have an equivalent on-device POI index (Geocoder is address-only, not POIs), so the cleanest path is Google Places API (New) at the consumer's expense, with a graceful Geocoder fallback when no key is configured.
+Commercial places APIs (Foursquare, Yelp) cost money and require a backend proxy for key safety. Apple's MapKit ships with iOS and surfaces a curated POI database that's strong for established businesses — good enough for "what restaurants are near me right now?" without writing a backend. Android doesn't have an equivalent on-device POI index (`Geocoder` is address-only, not POIs), so the cleanest path is Google Places API (New) at the consumer's expense. Without an API key configured, `searchNearby()` returns an empty array — predictable degradation, no surprises.
 
 ## Requirements
 

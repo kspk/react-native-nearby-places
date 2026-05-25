@@ -34,8 +34,9 @@ export type NearbyPlace = {
    * Opaque external identifier for the place. Populated on Android when
    * backed by Google Places (it's the Google `place_id`). Undefined on
    * iOS (MapKit has no stable POI identifier in our consumed surface)
-   * and on Android's Geocoder fallback. Per the Google Maps Platform
-   * ToS, this value may be persisted indefinitely; everything else here
+   * and on Android when no API key is configured (the result set is
+   * empty in that case anyway). Per the Google Maps Platform ToS,
+   * this value may be persisted indefinitely; everything else here
    * should be treated as session-scoped and re-fetched if needed.
    */
   placeId?: string;

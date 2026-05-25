@@ -1,0 +1,73 @@
+name: Publish to npm
+
+# Tag-triggered publish. The release flow is:
+#   1. Bump `version` in package.json
+#   2. Update CHANGELOG.md
+#   3. Commit + push (`git push origin main`)
+#   4. Tag + push (`git tag -a vX.Y.Z -m "..." && git push origin vX.Y.Z`)
+# This workflow then publishes to npm using OIDC trusted publishing
+# (no NPM_TOKEN secret needed — GitHub Actions authenticates to npm
+# directly), and attaches a provenance attestation that shows up as a
+# verified badge on the npm package page.
+#
+# Setup checklist (one-time, after the first manual publish claims the name):
+#   - npmjs.com → package settings → Publishing access →
+#     "GitHub Actions" → repo `kspk/react-native-nearby-places`,
+#     workflow `.github/workflows/publish.yml`, environment (blank).
+#   - Tag a version locally and push the tag. CI takes over.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      # `contents: read` — checkout the tagged commit.
+      contents: read
+      # `id-token: write` — required for OIDC trusted publishing.
+      # See https://docs.npmjs.com/trusted-publishers
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          # npm 11+ ships with Node 22; we need ≥11.5.0 for OIDC.
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        # `npm ci` uses the committed package-lock.json for a
+        # reproducible install — safer than `npm install` in CI.
+        run: npm ci
+
+      - name: Verify tag matches package.json version
+        # Catches the common slip of tagging v0.4.2 without bumping
+        # the version in package.json (which would then publish the
+        # *previous* version under the new tag, or no-op if npm sees
+        # an existing version). Fail loudly here instead.
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+          echo "Tag and package.json agree on version $PKG_VERSION"
+
+      - name: Type-check
+        # Runs `tsc --noEmit` per the `lint` script in package.json.
+        # Cheap last-line-of-defence before publishing.
+        run: npm run lint
+
+      - name: Publish to npm
+        # `--provenance` opts into npm's verifiable build attestation.
+        # OIDC handles auth; no NODE_AUTH_TOKEN env var needed.
+        run: npm publish --provenance

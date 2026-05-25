@@ -70,4 +70,6 @@ jobs:
       - name: Publish to npm
         # `--provenance` opts into npm's verifiable build attestation.
         # OIDC handles auth; no NODE_AUTH_TOKEN env var needed.
-        run: npm publish --provenance
+        run: npm publish
+        env:
+          NPM_CONFIG_PROVENANCE: true

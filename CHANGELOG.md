@@ -4,6 +4,25 @@ All notable changes to this project will be documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is
 [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] — 2026-05-22
+
+First published-to-npm release. No runtime changes from 0.4.0 — this is
+a packaging-hygiene patch:
+
+### Changed
+- `package.json` `files` array tightened: was `["android"]`, now
+  `["android/src", "android/build.gradle"]`. The wholesale `"android"`
+  entry was pulling Gradle's `android/build/` output (compiled .class
+  files, intermediate caches) into the npm tarball, ballooning the
+  package from ~16 kB → ~352 kB compressed (1.5 MB unpacked).
+- Added `.npmignore` as a belt-and-suspenders guard against future
+  build artifacts sneaking back in.
+- Added `CHANGELOG.md` to the `files` allowlist so the npm page shows
+  release notes.
+- Description now mentions Android (was iOS-only language from the
+  0.1.x era).
+- `android` and `google-places` added to keywords.
+
 ## [0.4.0] — 2026-05-22
 
 ### Removed

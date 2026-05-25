@@ -1,16 +1,18 @@
 {
   "name": "react-native-nearby-places",
-  "version": "0.4.0",
-  "description": "Native nearby Point-of-Interest search for React Native — backed by MKLocalSearch on iOS. No API key, no quota.",
+  "version": "0.4.1",
+  "description": "Native nearby Point-of-Interest search for React Native — MKLocalSearch on iOS (no key), Google Places API (New) on Android. New-architecture TurboModule, zero Expo deps.",
   "main": "src/index.ts",
   "react-native": "src/index.ts",
   "types": "src/index.ts",
   "files": [
     "src",
     "ios",
-    "android",
+    "android/src",
+    "android/build.gradle",
     "react-native-nearby-places.podspec",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
@@ -19,8 +21,11 @@
   "keywords": [
     "react-native",
     "ios",
+    "android",
     "mapkit",
     "mklocalsearch",
+    "google-places",
+    "places-api",
     "poi",
     "points-of-interest",
     "nearby",

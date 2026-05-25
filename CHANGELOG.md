@@ -4,6 +4,26 @@ All notable changes to this project will be documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is
 [SemVer](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] — 2026-05-25
+
+### Changed
+- CI workflow: bumped Node to `24` (was `22`) so the runner ships with a
+  newer npm.
+- CI workflow: switched provenance from a `npm publish --provenance`
+  flag to the `NPM_CONFIG_PROVENANCE=true` env var — equivalent
+  behaviour but doesn't require the flag to be passed at every call
+  site.
+- `package.json` `publishConfig`: added `{ "access": "public",
+  "provenance": true }` so any future *local* `npm publish` invocations
+  also default to provenance-on (CI was already doing it via env var;
+  this makes manual publishes consistent).
+
+### Notes
+- `v0.4.2` was tagged but never reached npm — the CI publish failed
+  during initial OIDC trusted-publisher debugging. `0.4.3` carries the
+  same doc fixes as `0.4.2` (Geocoder mentions stripped) plus the
+  workflow + publishConfig changes above.
+
 ## [0.4.2] — 2026-05-22
 
 ### Docs
